@@ -6,6 +6,63 @@ import java.util.*;
  * Class <code>RWayTrie</code> implements interface <code>Trie</code>.
  */
 public class RWayTrie implements Trie{
+
+
+    private class RWayTrieIterator implements Iterator<String>{
+        Queue<String> prefixes = new LinkedList<>();
+        Queue<Node> nodes = new LinkedList<>();
+
+        Node currentNode;
+        String currentPrefix;
+        boolean flag = false;
+
+        public RWayTrieIterator(String prefix){
+            this.currentNode = get(root, prefix, 0);
+            this.currentPrefix = prefix;
+            nodes.add(currentNode);
+            prefixes.add(currentPrefix);
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (!nodes.isEmpty()) return true;
+            else{
+                for (int i = 0; i < ALPHABET; i++) {
+                    if (currentNode.next[i] != null) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        @Override
+        public String next() {
+            while (true) {
+                if (!flag) {
+                    currentNode = nodes.poll();
+                    currentPrefix = prefixes.poll();
+                    if (currentNode.length != 0) {
+                        flag = true;
+                        return currentPrefix;
+                    }
+                }
+                else{
+                    flag = false;
+                }
+                        for (int i = 0; i < ALPHABET; i++) {
+                            if (currentNode.next[i] != null) {
+                                nodes.add(currentNode.next[i]);
+                                char c = (char) (i + 'a');
+                                prefixes.add(currentPrefix + c);
+                            }
+                        }
+
+
+            }
+        }
+    }
+
     /**
      * Class <code>Node</code> has information about word ending and next letter in word.
      */
@@ -114,35 +171,17 @@ public class RWayTrie implements Trie{
         return get(node.next[c - 'a'], word, d + 1);
     }
 
+
+
     public Iterable<String> words() {
         return wordsWithPrefix("");
     }
 
-    public Iterable<String> wordsWithPrefix(String pref) {
-        List<String> words = new ArrayList<>();
-        Queue<String> results = new LinkedList<>();
-        Queue<Node> nodes = new LinkedList<>();
-        Node node = get(root, pref, 0);
-        nodes.add(node);
-        results.add(pref);
-        while (!nodes.isEmpty()){
-            Node n = nodes.poll();
-            String prefix = results.poll();
-            if (n.length != 0) {
-                words.add(prefix);
-            }
-            for (int i = 0; i < ALPHABET; i++){
-                if (n.next[i] != null){
-                    nodes.add(n.next[i]);
-                    char c = (char) (i + 'a');
-                    results.add(prefix + c);
-                }
-            }
-        }
+    public Iterable<String> wordsWithPrefix(String prefix){
         return new Iterable<String>() {
             @Override
             public Iterator<String> iterator() {
-                return words.iterator();
+                return new RWayTrieIterator(prefix);
             }
         };
     }

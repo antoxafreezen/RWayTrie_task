@@ -6,10 +6,7 @@ import trie.Tuple;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Class <code>vocabulary.PrefixMatches</code> implements vocabulary.
@@ -73,21 +70,50 @@ public class PrefixMatches {
      * @return list of suitable words
      */
     public Iterable<String> wordsWithPrefix(String pref, int k){
-        Iterator<String> iterator = trie.wordsWithPrefix(pref).iterator();
-        List<String> words = new ArrayList<>();
-        while (iterator.hasNext()){
-            String word = iterator.next();
-            if (word.length() <= k + 2){
-                words.add(word);
-            }
-        }
         return new Iterable<String>() {
             @Override
             public Iterator<String> iterator() {
-                return words.iterator();
+                return new PrefixMatchesIterator(trie.wordsWithPrefix(pref), k);
             }
         };
     }
+
+    private class PrefixMatchesIterator implements Iterator<String>{
+        Iterator<String> iterator;
+        int k;
+        public PrefixMatchesIterator(Iterable<String> iterable,int k){
+            this.iterator = iterable.iterator();
+            this.k = k;
+        }
+
+        String word;
+        boolean polledNext = false;
+        @Override
+        public boolean hasNext() {
+            if (polledNext) return true;
+            while  (iterator.hasNext()){
+                word = iterator.next();
+                if (word.length() <= k + 2){
+                    polledNext = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public String next() {
+            if (!this.hasNext()) {
+                throw new NoSuchElementException();
+            }
+
+            polledNext = false;
+            return word;
+        }
+    }
+
+
 
     /**
      * Get words which have according prefix.
