@@ -1,3 +1,5 @@
+package vocabulary;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -6,7 +8,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import trie.RWayTrie;
 import trie.Trie;
 import trie.Tuple;
-import vocabulary.PrefixMatches;
 
 import java.io.FileNotFoundException;
 import java.util.Iterator;
@@ -129,7 +130,8 @@ public class PrefixMatchesTest {
 
     @Test(expected = NullPointerException.class)
     public void wordsStartWithNullPrefixShouldRiseException(){
-        doThrow(new NullPointerException()).when(trie).wordsWithPrefix(null);
+        PrefixMatches prefixMatches = mock(PrefixMatches.class);
+        doThrow(new NullPointerException()).when(prefixMatches).wordsWithPrefix(null);
         prefixMatches.wordsWithPrefix(null);
     }
 
